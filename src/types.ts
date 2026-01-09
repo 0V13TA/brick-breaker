@@ -24,6 +24,11 @@ export enum PlayStatus {
   REDUCED_PADDLE_SIZE,
 }
 
+export type ActiveStatus = {
+  type: PlayStatus;
+  duration: number;
+};
+
 export enum BlockType {
   DROP,
   NORMAL,
@@ -51,6 +56,21 @@ export type GameState = {
   ballArray: Ball[];
   blockArray: Block[];
   shooterArray: Shooter[];
-  gameStatus: PlayStatus[];
+  activeStatuses: ActiveStatus[];
   uniqueDropArray: UniqueStatusDrop[];
+};
+
+export const StatusNames: Record<PlayStatus, string> = {
+  [PlayStatus.BOMB]: "Bomb",
+  [PlayStatus.SHOOTER]: "Shooter",
+  [PlayStatus.FIRE_BALL]: "Fire Ball",
+  [PlayStatus.GHOST_PADDLE]: "Ghost",
+  [PlayStatus.EXTRA_HEALTH]: "Heart +1",
+  [PlayStatus.REDUCED_SPEED]: "Slow Mo",
+  [PlayStatus.LONGER_PADDLE]: "Wide Paddle",
+  [PlayStatus.INCREASED_SPEED]: "Fast Forward",
+  [PlayStatus.DUPLICATE_PADDLE]: "Dual Paddle",
+  [PlayStatus.INVERTED_CONTROLS]: "Inverted",
+  [PlayStatus.REDUCED_BALL_SIZE]: "Tiny Ball",
+  [PlayStatus.REDUCED_PADDLE_SIZE]: "Tiny Paddle",
 };

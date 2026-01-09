@@ -1,6 +1,7 @@
-import { Paddle } from "./objects/paddle";
 import "./style.css";
 import { GameScreen, type GameState } from "./types";
+import * as GamePlay from "./screens/gameplay.ts";
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d")!;
 document.body.append(canvas);
@@ -20,9 +21,9 @@ const gameState: GameState = {
   gameScreen: GameScreen.GAME_PLAY,
 
   ballArray: [],
-  gameStatus: [],
   blockArray: [],
   shooterArray: [],
+  activeStatuses: [],
   uniqueDropArray: [],
 
   volume: {
@@ -32,13 +33,34 @@ const gameState: GameState = {
   },
 };
 
-const paddle = new Paddle(gameState);
-
 function animate() {
   requestAnimationFrame(animate);
-  paddle.update();
+
+  switch (gameState.gameScreen) {
+    case GameScreen.PAUSE_SCREEN:
+      break;
+    case GameScreen.GAME_PLAY:
+      GamePlay.update(gameState);
+      break;
+    case GameScreen.GAME_OVER:
+      break;
+    default:
+      console.error("Invalid Screen type", gameState.gameScreen);
+  }
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  paddle.draw();
+
+  switch (gameState.gameScreen) {
+    case GameScreen.PAUSE_SCREEN:
+      break;
+    case GameScreen.GAME_PLAY:
+      GamePlay.draw(gameState);
+      break;
+    case GameScreen.GAME_OVER:
+      break;
+    default:
+      console.error("Invalid Screen type", gameState.gameScreen);
+  }
 }
 
 animate();
