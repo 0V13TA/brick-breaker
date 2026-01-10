@@ -2,6 +2,7 @@ import { LAYOUT, level1 } from "../data.ts";
 import { Ball } from "../objects/ball";
 import { Block } from "../objects/block.ts";
 import { Paddle } from "../objects/paddle";
+import { UniqueStatusDrop } from "../objects/uniqueStatus.ts";
 import {
   BlockType,
   GameScreen,
@@ -119,38 +120,68 @@ export function update(gameState: GameState) {
     ghost = null;
   }
 
-  gameState.blockArray.forEach((block, index) => {
-    gameState.ballArray.forEach((ball) => {
-      // Paddle Collision
-      if (checkCollisionCircleRec(paddle, ball)) {
-        handlePaddleCollisionSKill(ball, paddle);
-      }
+  gameState.ballArray.forEach((ball) => {
+    // ... movement logic ...
 
-      if (isGhostActive > -1 && checkCollisionCircleRec(paddle, ball)) {
-        handlePaddleCollisionSKill(ball, paddle);
-      }
+    // Wall Collisions
+    if (ball.x <= 0 || ball.x >= 1) ball.dx *= -1;
+    if (ball.y <= 0) ball.dy *= -1;
 
-      // Block Collision
+    // Paddle Collision
+    if (checkCollisionCircleRec(paddle, ball)) {
+      handlePaddleCollisionSKill(ball, paddle);
+    }
+
+    ball.update();
+
+    gameState.blockArray.forEach((block, index) => {
+      if (block.type === BlockType.DROP) return; // Ignore already broken blocks
+
       const collisionDir = getCollisionDirection(ball, block);
-
       if (collisionDir) {
-        // Resolve Collision
-        if (collisionDir === "horizontal") {
-          ball.dx *= -1;
-        } else {
-          ball.dy *= -1;
+        // ... bounce logic (dx/dy flip) ...
+        const collisionDir = getCollisionDirection(ball, block);
+        if (collisionDir) {
+          // Resolve Collision
+          if (collisionDir === "horizontal") {
+            ball.dx *= -1;
+          } else {
+            ball.dy *= -1;
+          }
         }
 
-        // Skip blocks that can't be destroyed.
-        if (block.type !== BlockType.INDESTRUCTIBLE)
-          gameState.blockArray.splice(index, 1);
-      }
+        // DESTROY BLOCK
+        gameState.blockArray.splice(index, 1);
 
-      ball.update();
-      console.log(
-        "I am here and the nigga above me didn't run because he is a pussy.",
-      );
+        // SPAWN DROP if the block had content
+        if (block.content !== null) {
+          const drop = new UniqueStatusDrop(
+            block.x + block.width / 2,
+            block.y,
+            block.content,
+            gameState,
+          );
+          gameState.uniqueDropArray.push(drop);
+        }
+      }
     });
+  });
+
+  // 2. PADDLE VS DROP (Collecting Power-ups)
+  gameState.uniqueDropArray.forEach((drop, index) => {
+    drop.update();
+
+    // Check collision with paddle
+    if (checkCollisionCircleRec(paddle, drop)) {
+      // Remove drop
+      gameState.uniqueDropArray.splice(index, 1);
+
+      // Activate Status
+      gameState.activeStatuses.push({
+        type: drop.dropType,
+        duration: 600, // 10 seconds at 60fps
+      });
+    }
   });
 }
 
