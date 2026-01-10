@@ -1,7 +1,10 @@
-function drawPauseScreen(
-  ctx: CanvasRenderingContext2D,
-  canvas: HTMLCanvasElement,
-) {
+import { type GameState } from "../types";
+
+export function update() {}
+
+export function draw(gameState: GameState) {
+  const ctx = gameState.ctx;
+  const canvas = ctx.canvas;
   ctx.save();
 
   // Semi-transparent background

@@ -1,6 +1,8 @@
 import "./style.css";
 import { GameScreen, type GameState } from "./types";
 import * as GamePlay from "./screens/gameplay.ts";
+import * as Pause from "./screens/pause.ts";
+import * as GameOver from "./screens/gameover.ts";
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d")!;
@@ -40,11 +42,13 @@ function animate() {
 
   switch (gameState.gameScreen) {
     case GameScreen.PAUSE_SCREEN:
+      Pause.update();
       break;
     case GameScreen.GAME_PLAY:
       GamePlay.update(gameState);
       break;
     case GameScreen.GAME_OVER:
+      GameOver.update();
       break;
     default:
       console.error("Invalid Screen type", gameState.gameScreen);
@@ -54,11 +58,13 @@ function animate() {
 
   switch (gameState.gameScreen) {
     case GameScreen.PAUSE_SCREEN:
+      Pause.draw(gameState);
       break;
     case GameScreen.GAME_PLAY:
       GamePlay.draw(gameState);
       break;
     case GameScreen.GAME_OVER:
+      GameOver.draw(gameState);
       break;
     default:
       console.error("Invalid Screen type", gameState.gameScreen);
@@ -66,3 +72,20 @@ function animate() {
 }
 
 animate();
+
+addEventListener("keydown", (e) => {
+  if (e.code === "Escape") {
+    if (gameState.gameScreen === GameScreen.GAME_PLAY) {
+      gameState.gameScreen = GameScreen.PAUSE_SCREEN;
+    } else if (gameState.gameScreen === GameScreen.PAUSE_SCREEN) {
+      gameState.gameScreen = GameScreen.GAME_PLAY;
+    }
+  }
+
+  if (gameState.gameScreen === GameScreen.GAME_OVER && e.code === "Space") {
+    // Simple Reset Logic
+    gameState.life = 3;
+    gameState.gameScreen = GameScreen.GAME_PLAY;
+    GamePlay.init(gameState); // Re-init level
+  }
+});

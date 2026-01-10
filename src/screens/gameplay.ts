@@ -2,7 +2,13 @@ import { LAYOUT, level1 } from "../data.ts";
 import { Ball } from "../objects/ball";
 import { Block } from "../objects/block.ts";
 import { Paddle } from "../objects/paddle";
-import { BlockType, PlayStatus, StatusNames, type GameState } from "../types";
+import {
+  BlockType,
+  GameScreen,
+  PlayStatus,
+  StatusNames,
+  type GameState,
+} from "../types";
 import {
   checkCollisionCircleRec,
   getCollisionDirection,
@@ -28,8 +34,10 @@ export function init(gameState: GameState) {
   createLevel(gameState);
 
   addEventListener("keydown", (e) => {
-    paddle.move(e);
-    ghost?.move(e);
+    if (gameState.gameScreen === GameScreen.GAME_PLAY) {
+      paddle.move(e);
+      ghost?.move(e);
+    }
   });
 }
 
@@ -83,6 +91,12 @@ function createLevel(gameState: GameState) {
       gameState.blockArray.push(block);
     });
   });
+}
+
+function resetBall(gameState: GameState) {
+  gameState.ballArray = []; // Clear old balls
+  // Re-run init to spawn a fresh ball
+  init(gameState);
 }
 
 export function update(gameState: GameState) {
