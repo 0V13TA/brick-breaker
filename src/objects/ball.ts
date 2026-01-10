@@ -1,3 +1,4 @@
+import { LAYOUT } from "../data.ts";
 import { type GameState } from "../types.ts";
 
 export class Ball {
@@ -49,7 +50,7 @@ export class Ball {
     }
 
     // Ceiling Collision
-    if (this.y - this.radius < 0) {
+    if (this.y - this.radius + LAYOUT.marginTop < 0) {
       this.dy *= -1;
       this.y = this.radius;
     }
