@@ -11,6 +11,14 @@ export type BlockRow = [
   number,
 ];
 
+export const LAYOUT = {
+  marginTop: 0.05, // 5% space at the top for UI
+  marginLeft: 0.02, // 2% padding on the left
+  marginRight: 0.02, // 2% padding on the right
+  gap: 0.01, // 1% gap between blocks
+  rowHeight: 0.05, // Each row is 5% of the screen height
+};
+
 // 0 = Empty
 // 1 = Normal
 // 2 = Drop Status

@@ -1,4 +1,4 @@
-import { level1 } from "../data.ts";
+import { LAYOUT, level1 } from "../data.ts";
 import { Ball } from "../objects/ball";
 import { Block } from "../objects/block.ts";
 import { Paddle } from "../objects/paddle";
@@ -8,14 +8,6 @@ import {
   getCollisionDirection,
   handlePaddleCollisionSKill,
 } from "../utils.ts";
-
-const LAYOUT = {
-  marginTop: 0.05, // 5% space at the top for UI
-  marginLeft: 0.02, // 2% padding on the left
-  marginRight: 0.02, // 2% padding on the right
-  gap: 0.01, // 1% gap between blocks
-  rowHeight: 0.05, // Each row is 5% of the screen height
-};
 
 let paddle: Paddle;
 let ghost: Paddle | null = null;
