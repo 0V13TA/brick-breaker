@@ -19,7 +19,7 @@ export class Ball {
     this.color = "red";
 
     // Initial speed
-    this.speed = this.gameState.ballSpeed || 0.01;
+    this.speed = this.gameState.ballSpeed || 0.001;
     this.dx = this.speed;
     this.dy = -this.speed;
   }
