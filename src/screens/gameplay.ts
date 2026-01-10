@@ -1,13 +1,14 @@
 import { Ball } from "../objects/ball";
 import { Paddle } from "../objects/paddle";
-import { PlayStatus, StatusNames, type GameState } from "../types";
+import { BlockType, PlayStatus, StatusNames, type GameState } from "../types";
 import {
   checkCollisionCircleRec,
+  getCollisionDirection,
   handlePaddleCollisionSKill,
 } from "../utils.ts";
 
 let paddle: Paddle;
-let ghost: Paddle | null;
+let ghost: Paddle | null = null;
 
 export function init(gameState: GameState) {
   paddle = new Paddle(gameState);
@@ -16,35 +17,64 @@ export function init(gameState: GameState) {
     const newBall = new Ball(
       gameState,
       paddle.x + paddle.width / 2,
-      paddle.y + 0.01,
+      paddle.y - 0.02,
     );
     gameState.ballArray.push(newBall);
   }
+
+  addEventListener("keydown", (e) => {
+    paddle.move(e);
+    ghost?.move(e);
+  });
 }
 
 export function update(gameState: GameState) {
-  const isGhostActive = gameState.activeStatuses.findIndex(
-    (val) => val.type === PlayStatus.GHOST_PADDLE,
-  );
+  // filter out the statuses that has ended
   gameState.activeStatuses = gameState.activeStatuses.filter((status) => {
     status.duration--; // Decrease time by 1 frame
     return status.duration > 0;
   });
+
+  const isGhostActive = gameState.activeStatuses.findIndex(
+    (val) => val.type === PlayStatus.GHOST_PADDLE,
+  );
+
   paddle.update();
 
   if (!gameState.ghostDrawn && isGhostActive > -1) {
     ghost = new Paddle(gameState, true);
     ghost.update();
+  } else if (isGhostActive < 0) {
+    ghost = null;
   }
 
-  gameState.ballArray.forEach((ball) => {
-    if (checkCollisionCircleRec(paddle, ball)) {
-      handlePaddleCollisionSKill(ball, paddle);
-    }
+  gameState.blockArray.forEach((block, index) => {
+    gameState.ballArray.forEach((ball) => {
+      // Paddle Collision
+      if (checkCollisionCircleRec(paddle, ball)) {
+        handlePaddleCollisionSKill(ball, paddle);
+      }
 
-    if (isGhostActive > -1 && checkCollisionCircleRec(paddle, ball)) {
-      handlePaddleCollisionSKill(ball, paddle);
-    }
+      if (isGhostActive > -1 && checkCollisionCircleRec(paddle, ball)) {
+        handlePaddleCollisionSKill(ball, paddle);
+      }
+
+      // Block Collision
+      const collisionDir = getCollisionDirection(ball, block);
+
+      if (collisionDir) {
+        // Resolve Collision
+        if (collisionDir === "horizontal") {
+          ball.dx *= -1;
+        } else {
+          ball.dy *= -1;
+        }
+
+        // Skip blocks that can't be destroyed.
+        if (block.type !== BlockType.INDESTRUCTIBLE)
+          gameState.blockArray.splice(index, 1);
+      }
+    });
   });
 }
 

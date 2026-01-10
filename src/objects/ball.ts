@@ -1,5 +1,4 @@
-import { GameState } from "../types";
-import { Paddle } from "./paddle"; // Import needed for type checks if desired
+import { type GameState } from "../types.ts";
 
 export class Ball {
   x: number;

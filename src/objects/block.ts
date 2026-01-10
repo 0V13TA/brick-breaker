@@ -1,4 +1,4 @@
-import { BlockType, GameState, PlayStatus } from "../types";
+import { BlockType, type GameState, PlayStatus } from "../types";
 
 export class Block {
   x: number;

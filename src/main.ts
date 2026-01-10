@@ -33,6 +33,8 @@ const gameState: GameState = {
   },
 };
 
+GamePlay.init(gameState);
+
 function animate() {
   requestAnimationFrame(animate);
 
@@ -64,5 +66,3 @@ function animate() {
 }
 
 animate();
-
-addEventListener("keydown", (e) => paddle.move(e));
