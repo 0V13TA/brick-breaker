@@ -16,12 +16,16 @@ export class Block {
   constructor(
     startX: number,
     startY: number,
+    width: number,
+    height: number,
     type: BlockType,
     gameState: GameState,
     hasContent: boolean = false,
   ) {
     this.x = startX;
     this.y = startY;
+    this.width = width;
+    this.height = height;
     this.type = type;
     this.gameState = gameState;
     this.ctx = this.gameState.ctx;

@@ -1,4 +1,6 @@
+import { level1 } from "../data.ts";
 import { Ball } from "../objects/ball";
+import { Block } from "../objects/block.ts";
 import { Paddle } from "../objects/paddle";
 import { BlockType, PlayStatus, StatusNames, type GameState } from "../types";
 import {
@@ -6,6 +8,14 @@ import {
   getCollisionDirection,
   handlePaddleCollisionSKill,
 } from "../utils.ts";
+
+const LAYOUT = {
+  marginTop: 0.05, // 5% space at the top for UI
+  marginLeft: 0.02, // 2% padding on the left
+  marginRight: 0.02, // 2% padding on the right
+  gap: 0.01, // 1% gap between blocks
+  rowHeight: 0.05, // Each row is 5% of the screen height
+};
 
 let paddle: Paddle;
 let ghost: Paddle | null = null;
@@ -22,9 +32,64 @@ export function init(gameState: GameState) {
     gameState.ballArray.push(newBall);
   }
 
+  gameState.blockArray = [];
+  createLevel(gameState);
+
   addEventListener("keydown", (e) => {
     paddle.move(e);
     ghost?.move(e);
+  });
+}
+
+function createLevel(gameState: GameState) {
+  // Use the length of the first row to determine columns
+  const numCols = level1[0].length;
+
+  // 1. Calculate Available Width
+  // Total width (1.0) minus Left Margin minus Right Margin
+  const totalAvailableWidth = 1.0 - LAYOUT.marginLeft - LAYOUT.marginRight;
+
+  // 2. Calculate Total Space taken by Gaps
+  // If we have 10 columns, there are 9 gaps between them
+  const totalGapWidth = (numCols - 1) * LAYOUT.gap;
+
+  // 3. Calculate Single Block Width
+  const blockWidth = (totalAvailableWidth - totalGapWidth) / numCols;
+
+  level1.forEach((row, rowIndex) => {
+    row.forEach((cellValue, colIndex) => {
+      if (cellValue === 0) return;
+
+      // 4. Calculate Position
+      // Start at Margin + (BlockWidth * ColIndex) + (Gap * ColIndex)
+      const x = LAYOUT.marginLeft + colIndex * (blockWidth + LAYOUT.gap);
+
+      // Start at MarginTop + (BlockHeight * RowIndex) + (Gap * RowIndex) + Tiny Padding
+      const y =
+        LAYOUT.marginTop + rowIndex * (LAYOUT.rowHeight + LAYOUT.gap) + 0.01;
+
+      let type = BlockType.NORMAL;
+      let hasContent = false;
+
+      if (cellValue === 2) {
+        type = BlockType.DROP;
+        hasContent = true;
+      } else if (cellValue === 4) {
+        type = BlockType.INDESTRUCTIBLE;
+      }
+
+      const block = new Block(
+        x,
+        y,
+        blockWidth,
+        LAYOUT.rowHeight,
+        type,
+        gameState,
+        hasContent,
+      );
+
+      gameState.blockArray.push(block);
+    });
   });
 }
 
@@ -74,6 +139,11 @@ export function update(gameState: GameState) {
         if (block.type !== BlockType.INDESTRUCTIBLE)
           gameState.blockArray.splice(index, 1);
       }
+
+      ball.update();
+      console.log(
+        "I am here and the nigga above me didn't run because he is a pussy.",
+      );
     });
   });
 }
@@ -98,30 +168,52 @@ export function draw(gameState: GameState) {
 }
 
 function drawUI(ctx: CanvasRenderingContext2D, gameState: GameState) {
-  const padding = 20;
-
+  // Draw the Background Bar for the UI
   ctx.save();
-  ctx.font = "20px Arial";
+  ctx.fillStyle = "#222"; // Dark gray background for status bar
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height * LAYOUT.marginTop);
+
+  // Add a separator line
+  ctx.beginPath();
+  ctx.strokeStyle = "#444";
+  ctx.lineWidth = 2;
+  ctx.moveTo(0, ctx.canvas.height * LAYOUT.marginTop);
+  ctx.lineTo(ctx.canvas.width, ctx.canvas.height * LAYOUT.marginTop);
+  ctx.stroke();
+
+  // Text Settings
+  const padding = 20;
+  ctx.font = "bold 20px Arial";
+  ctx.textBaseline = "middle";
+  const barCenterY = (ctx.canvas.height * LAYOUT.marginTop) / 2;
+
+  // -- LEFT: Lives --
   ctx.fillStyle = "white";
   ctx.textAlign = "left";
-  ctx.textBaseline = "top";
+  ctx.fillText(`Lives: ${gameState.life}`, padding, barCenterY);
 
-  // -- Lives --
-  ctx.fillText(`Lives: ${gameState.life}`, padding, padding);
+  // -- CENTER: Level / Info -- (Optional)
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#aaa";
+  ctx.fillText("LEVEL 1", ctx.canvas.width / 2, barCenterY);
 
-  // -- Active Statuses (Right Side) --
+  // -- RIGHT: Active Statuses --
+  // We draw them as small colorful badges
   ctx.textAlign = "right";
-  let yPos = padding;
+  let currentX = ctx.canvas.width - padding;
 
   gameState.activeStatuses.forEach((status) => {
     const name = StatusNames[status.type] || "Unknown";
-    const secondsLeft = Math.ceil(status.duration / 60); // Assuming 60fps
+    const secondsLeft = Math.ceil(status.duration / 60);
 
-    // Draw Status Name
-    ctx.fillStyle = "#00ff88"; // Green text for buffs
-    ctx.fillText(`${name} (${secondsLeft}s)`, ctx.canvas.width - padding, yPos);
+    // Status Text
+    ctx.fillStyle = "#00ff88";
+    const text = `${name} (${secondsLeft}s)`;
+    ctx.fillText(text, currentX, barCenterY);
 
-    yPos += 30; // Move down for next item
+    // Move X position to the left for the next item
+    const textWidth = ctx.measureText(text).width;
+    currentX -= textWidth + 20; // 20px spacing between items
   });
 
   ctx.restore();
