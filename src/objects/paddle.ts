@@ -8,6 +8,7 @@ export class Paddle {
   color: string;
   private gameState: GameState;
   private ctx: CanvasRenderingContext2D;
+  // Make these public or keep private and use inside update
   private leftButton: string = "ArrowLeft";
   private rightButton: string = "ArrowRight";
 
@@ -40,19 +41,19 @@ export class Paddle {
     this.ctx.stroke();
   }
 
-  move(e: KeyboardEvent) {
-    if (e.key === this.leftButton) {
+  // UPDATED: Now takes the set of active keys
+  update(keysPressed: Set<string>) {
+    // Check if our specific buttons are pressed
+    if (keysPressed.has(this.leftButton)) {
       this.x -= this.gameState.paddleSpeed;
     }
 
-    if (e.key === this.rightButton) {
+    if (keysPressed.has(this.rightButton)) {
       this.x += this.gameState.paddleSpeed;
     }
-  }
 
-  update() {
-    if (this.x <= 0 || this.x + this.width >= 1) {
-      this.x = Math.max(0, Math.min(this.x, 1 - this.width));
-    }
+    // Boundary Checks
+    if (this.x <= 0) this.x = 0;
+    if (this.x + this.width >= 1) this.x = 1 - this.width;
   }
 }

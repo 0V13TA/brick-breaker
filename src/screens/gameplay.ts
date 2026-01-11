@@ -18,6 +18,7 @@ import {
 
 let paddle: Paddle;
 let ghost: Paddle | null = null;
+const keysPressed = new Set<string>();
 
 export function init(gameState: GameState) {
   paddle = new Paddle(gameState);
@@ -34,11 +35,12 @@ export function init(gameState: GameState) {
   gameState.blockArray = [];
   createLevel(gameState);
 
-  addEventListener("keydown", (e) => {
-    if (gameState.gameScreen === GameScreen.GAME_PLAY) {
-      paddle.move(e);
-      ghost?.move(e);
-    }
+  window.addEventListener("keydown", (e) => {
+    keysPressed.add(e.key);
+  });
+
+  window.addEventListener("keyup", (e) => {
+    keysPressed.delete(e.key);
   });
 }
 
@@ -124,11 +126,11 @@ export function update(gameState: GameState) {
     (val) => val.type === PlayStatus.GHOST_PADDLE,
   );
 
-  paddle.update();
+  paddle.update(keysPressed);
 
   if (!gameState.ghostDrawn && isGhostActive > -1) {
     ghost = new Paddle(gameState, true);
-    ghost.update();
+    ghost.update(keysPressed);
   } else if (isGhostActive < 0) {
     ghost = null;
   }
