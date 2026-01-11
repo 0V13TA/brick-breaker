@@ -52,7 +52,7 @@ export class Ball {
     // Ceiling Collision
     if (this.y - this.radius + LAYOUT.marginTop < 0) {
       this.dy *= -1;
-      this.y = this.radius;
+      this.y = this.radius + LAYOUT.marginTop;
     }
 
     // Floor Collision (Game Over check usually happens here)

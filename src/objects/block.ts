@@ -52,7 +52,7 @@ export class Block {
         PlayStatus.REDUCED_PADDLE_SIZE,
       ];
 
-      const index = Math.random() * (contents.length - 1);
+      const index = Math.floor(Math.random() * (contents.length - 1));
       this.content = contents[index];
     }
   }

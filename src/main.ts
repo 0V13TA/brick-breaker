@@ -17,7 +17,7 @@ const gameState: GameState = {
   bombCount: 0,
   ballSize: 0.2,
   dropSpeed: 0.01,
-  ballSpeed: 0.3,
+  ballSpeed: 0.01,
   ghostDrawn: false,
   paddleSpeed: 0.01,
   gameScreen: GameScreen.GAME_PLAY,

@@ -94,10 +94,23 @@ function createLevel(gameState: GameState) {
   });
 }
 
-function resetBall(gameState: GameState) {
-  gameState.ballArray = []; // Clear old balls
-  // Re-run init to spawn a fresh ball
-  init(gameState);
+function resetTurn(gameState: GameState) {
+  // 1. Reset Paddle Position
+  paddle = new Paddle(gameState);
+
+  // 2. Spawn a New Ball at the paddle
+  gameState.ballArray = [];
+  const newBall = new Ball(
+    gameState,
+    paddle.x + paddle.width / 2,
+    paddle.y - 0.05, // Place slightly above paddle
+  );
+
+  // Ensure the new ball has the correct speed
+  newBall.dx = gameState.ballSpeed;
+  newBall.dy = -gameState.ballSpeed;
+
+  gameState.ballArray.push(newBall);
 }
 
 export function update(gameState: GameState) {
@@ -165,6 +178,16 @@ export function update(gameState: GameState) {
         }
       }
     });
+
+    if (gameState.ballArray.length === 0) {
+      gameState.life--; // Lose a life
+
+      if (gameState.life > 0) {
+        resetTurn(gameState); // Reset just the ball/paddle
+      } else {
+        gameState.gameScreen = GameScreen.GAME_OVER; // Game Over
+      }
+    }
   });
 
   // 2. PADDLE VS DROP (Collecting Power-ups)
