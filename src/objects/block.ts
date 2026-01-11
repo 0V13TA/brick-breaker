@@ -54,6 +54,9 @@ export class Block {
 
       const index = Math.floor(Math.random() * (contents.length - 1));
       this.content = contents[index];
+      console.log(
+        `Block at (${this.x}, ${this.y}) has content: ${this.content}`,
+      );
     }
   }
 

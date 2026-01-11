@@ -150,8 +150,6 @@ export function update(gameState: GameState) {
     ball.update();
 
     gameState.blockArray.forEach((block, index) => {
-      if (block.type === BlockType.DROP) return; // Ignore already broken blocks
-
       const collisionDir = getCollisionDirection(ball, block);
       if (collisionDir) {
         // ... bounce logic (dx/dy flip) ...
@@ -177,6 +175,7 @@ export function update(gameState: GameState) {
             gameState,
           );
           gameState.uniqueDropArray.push(drop);
+          console.log("Block content is", block.content);
         }
       }
     });
