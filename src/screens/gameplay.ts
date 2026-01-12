@@ -22,6 +22,8 @@ const keysPressed = new Set<string>();
 
 export function init(gameState: GameState) {
   paddle = new Paddle(gameState);
+  gameState.ballArray = [];
+  gameState.activeStatuses = [];
 
   if (gameState.ballArray.length === 0) {
     const newBall = new Ball(
@@ -164,7 +166,8 @@ export function update(gameState: GameState) {
         }
 
         // DESTROY BLOCK
-        gameState.blockArray.splice(index, 1);
+        if (block.type !== BlockType.INDESTRUCTIBLE)
+          gameState.blockArray.splice(index, 1);
 
         // SPAWN DROP if the block had content
         if (block.content !== null) {
@@ -175,7 +178,14 @@ export function update(gameState: GameState) {
             gameState,
           );
           gameState.uniqueDropArray.push(drop);
-          console.log("Block content is", block.content);
+        }
+
+        const blocks = gameState.blockArray.filter(
+          (block) => block.type !== BlockType.INDESTRUCTIBLE,
+        );
+
+        if (blocks.length === 0) {
+          gameState.gameScreen = GameScreen.GAME_OVER;
         }
       }
     });

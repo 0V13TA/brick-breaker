@@ -15,7 +15,7 @@ const gameState: GameState = {
   life: 3,
   ctx: ctx,
   bombCount: 0,
-  ballSize: 0.2,
+  ballSize: 0.015,
   dropSpeed: 0.01,
   ballSpeed: 0.01,
   ghostDrawn: false,

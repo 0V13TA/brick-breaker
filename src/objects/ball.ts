@@ -15,7 +15,7 @@ export class Ball {
     this.gameState = gameState;
     this.x = startX;
     this.y = startY;
-    this.radius = 0.015; // Adjusted relative to canvas size
+    this.radius = gameState.ballSize || 0.015; // Adjusted relative to canvas size
     this.color = "red";
 
     // Initial speed

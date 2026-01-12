@@ -29,6 +29,11 @@ export class Block {
     this.type = type;
     this.gameState = gameState;
     this.ctx = this.gameState.ctx;
+    this.color = "brown";
+
+    if (type === BlockType.INDESTRUCTIBLE) {
+      this.color = "steelblue";
+    }
 
     if (type !== BlockType.DROP && hasContent) {
       throw new Error(
@@ -52,11 +57,10 @@ export class Block {
         PlayStatus.REDUCED_PADDLE_SIZE,
       ];
 
-      const index = Math.floor(Math.random() * (contents.length - 1));
+      const index = Math.floor(Math.random() * contents.length);
       this.content = contents[index];
-      console.log(
-        `Block at (${this.x}, ${this.y}) has content: ${this.content}`,
-      );
+    } else {
+      this.content = null;
     }
   }
 

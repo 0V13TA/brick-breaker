@@ -19,11 +19,11 @@ export class UniqueStatusDrop {
   ) {
     this.x = startX;
     this.y = startY;
-    this.dy = 0.1;
-    this.radius = 0.3;
     this.dropType = dropType;
     this.gameState = gameState;
     this.ctx = this.gameState.ctx;
+    this.dy = gameState.ballSpeed;
+    this.radius = this.gameState.ballSize;
 
     switch (dropType) {
       case PlayStatus.BOMB:
@@ -75,6 +75,7 @@ export class UniqueStatusDrop {
       0,
     );
     this.ctx.fill();
+    this.ctx.stroke();
   }
 
   update() {

@@ -1,4 +1,4 @@
-import { type GameState } from "../types";
+import { BlockType, type GameState } from "../types";
 
 export function update() {}
 
@@ -12,7 +12,11 @@ export function draw(gameState: GameState) {
   ctx.fillStyle = "red";
   ctx.font = "48px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("GAME OVER", ctx.canvas.width / 2, ctx.canvas.height / 2);
+  gameState.blockArray.filter(
+    (block) => block.type !== BlockType.INDESTRUCTIBLE,
+  ).length === 0
+    ? ctx.fillText("You Win!!", ctx.canvas.width / 2, ctx.canvas.height / 2)
+    : ctx.fillText("GAME OVER", ctx.canvas.width / 2, ctx.canvas.height / 2);
 
   ctx.fillStyle = "white";
   ctx.font = "24px Arial";
