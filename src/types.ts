@@ -31,6 +31,7 @@ export type ActiveStatus = {
 
 export enum BlockType {
   DROP,
+  STRONG,
   NORMAL,
   INDESTRUCTIBLE,
 }

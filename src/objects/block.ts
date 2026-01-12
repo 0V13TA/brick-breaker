@@ -9,7 +9,8 @@ export class Block {
   height: number;
   private gameState: GameState;
   private ctx: CanvasRenderingContext2D;
-
+  hp: number; // Add Health
+  maxHp: number; // To calculate color intensity
   readonly type: BlockType;
   readonly content: PlayStatus | null;
 
@@ -30,6 +31,25 @@ export class Block {
     this.gameState = gameState;
     this.ctx = this.gameState.ctx;
     this.color = "brown";
+
+    // SETUP HEALTH
+    switch (type) {
+      case BlockType.STRONG:
+        this.hp = 3; // Takes 3 hits
+        this.color = "gold";
+        break;
+      case BlockType.INDESTRUCTIBLE:
+        this.hp = Infinity;
+        this.color = "gray";
+        break;
+      case BlockType.DROP:
+      case BlockType.NORMAL:
+      default:
+        this.hp = 1;
+        this.color = type === BlockType.DROP ? "purple" : "blue"; // Distinct colors
+        break;
+    }
+    this.maxHp = this.hp;
 
     if (type === BlockType.INDESTRUCTIBLE) {
       this.color = "steelblue";
@@ -66,8 +86,14 @@ export class Block {
 
   draw() {
     this.ctx.beginPath();
-    this.ctx.fillStyle = this.color;
-    this.gameState.ctx.strokeStyle = "black";
+    // VISUAL DAMAGE: Fade color as HP drops
+    if (this.type === BlockType.STRONG) {
+      const opacity = this.hp / this.maxHp;
+      this.ctx.globalAlpha = opacity; // Fade out
+      this.ctx.fillStyle = this.color;
+    } else {
+      this.ctx.fillStyle = this.color;
+    }
     this.gameState.ctx.rect(
       this.x * this.ctx.canvas.width,
       this.y * this.ctx.canvas.height,
@@ -76,5 +102,7 @@ export class Block {
     );
     this.ctx.fill();
     this.ctx.stroke();
+
+    this.ctx.globalAlpha = 1.0;
   }
 }

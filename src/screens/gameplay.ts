@@ -81,6 +81,8 @@ function createLevel(gameState: GameState) {
         hasContent = true;
       } else if (cellValue === 4) {
         type = BlockType.INDESTRUCTIBLE;
+      } else if (cellValue === 3) {
+        type = BlockType.STRONG;
       }
 
       const block = new Block(
@@ -154,10 +156,13 @@ export function update(gameState: GameState) {
     gameState.blockArray.forEach((block, index) => {
       const collisionDir = getCollisionDirection(ball, block);
       if (collisionDir) {
-        // ... bounce logic (dx/dy flip) ...
-        const collisionDir = getCollisionDirection(ball, block);
-        if (collisionDir) {
-          // Resolve Collision
+        const isFireBall = gameState.activeStatuses.some(
+          (s) => s.type === PlayStatus.FIRE_BALL,
+        );
+
+        // 1. Handle Bounce
+        // Fireball DOES NOT bounce (passes through), unless it hits Indestructible
+        if (!isFireBall || block.type === BlockType.INDESTRUCTIBLE) {
           if (collisionDir === "horizontal") {
             ball.dx *= -1;
           } else {
@@ -165,19 +170,32 @@ export function update(gameState: GameState) {
           }
         }
 
-        // DESTROY BLOCK
-        if (block.type !== BlockType.INDESTRUCTIBLE)
-          gameState.blockArray.splice(index, 1);
+        // 2. Handle Damage
+        if (block.type !== BlockType.INDESTRUCTIBLE) {
+          if (isFireBall) {
+            block.hp = 0; // INSTA-KILL
+          } else {
+            block.hp--; // Normal Damage
+          }
 
-        // SPAWN DROP if the block had content
-        if (block.content !== null) {
-          const drop = new UniqueStatusDrop(
-            block.x + block.width / 2,
-            block.y,
-            block.content,
-            gameState,
-          );
-          gameState.uniqueDropArray.push(drop);
+          // 3. Destroy if dead
+          if (block.hp <= 0) {
+            gameState.blockArray.splice(index, 1);
+
+            // Spawn Drop logic...
+            if (block.type === BlockType.DROP && block.content !== null) {
+              // ... spawn drop code ...
+              const drop = new UniqueStatusDrop(
+                block.x + block.width / 2,
+                block.y,
+                block.content,
+                gameState,
+              );
+              gameState.uniqueDropArray.push(drop);
+            }
+          }
+        } else if (isFireBall) {
+          gameState.blockArray.splice(index, 1);
         }
 
         const blocks = gameState.blockArray.filter(

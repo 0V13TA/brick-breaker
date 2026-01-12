@@ -1,4 +1,4 @@
-import type { GameState } from "../types";
+import { PlayStatus, type GameState } from "../types";
 
 export class Paddle {
   x: number;
@@ -8,23 +8,19 @@ export class Paddle {
   color: string;
   private gameState: GameState;
   private ctx: CanvasRenderingContext2D;
-  // Make these public or keep private and use inside update
-  private leftButton: string = "ArrowLeft";
-  private rightButton: string = "ArrowRight";
+  private readonly isGhost: boolean;
+
+  private defaultWidth = 0.2;
 
   constructor(gameState: GameState, isGhost: boolean = false) {
     this.x = 0.4;
     this.y = 0.93;
-    this.width = 0.2;
+    this.width = this.defaultWidth;
     this.height = 0.03;
     this.color = "darkgreen";
     this.gameState = gameState;
     this.ctx = this.gameState.ctx;
-
-    if (isGhost) {
-      this.leftButton = "ArrowRight";
-      this.rightButton = "ArrowLeft";
-    }
+    this.isGhost = isGhost;
   }
 
   draw() {
@@ -41,14 +37,32 @@ export class Paddle {
     this.ctx.stroke();
   }
 
-  // UPDATED: Now takes the set of active keys
   update(keysPressed: Set<string>) {
-    // Check if our specific buttons are pressed
-    if (keysPressed.has(this.leftButton)) {
+    // 1. Handle Active Status Effects on Paddle
+    const isLong = this.gameState.activeStatuses.some(
+      (s) => s.type === PlayStatus.LONGER_PADDLE,
+    );
+    const isShort = this.gameState.activeStatuses.some(
+      (s) => s.type === PlayStatus.REDUCED_PADDLE_SIZE,
+    );
+    const isInverted = this.gameState.activeStatuses.some(
+      (s) => s.type === PlayStatus.INVERTED_CONTROLS,
+    );
+
+    // Set Width
+    if (isLong) this.width = 0.3;
+    else if (isShort) this.width = 0.1;
+    else this.width = this.defaultWidth;
+
+    // Set Controls
+    const leftKey = isInverted || this.isGhost ? "ArrowRight" : "ArrowLeft";
+    const rightKey = isInverted || this.isGhost ? "ArrowLeft" : "ArrowRight";
+
+    // 2. Movement Logic
+    if (keysPressed.has(leftKey)) {
       this.x -= this.gameState.paddleSpeed;
     }
-
-    if (keysPressed.has(this.rightButton)) {
+    if (keysPressed.has(rightKey)) {
       this.x += this.gameState.paddleSpeed;
     }
 
