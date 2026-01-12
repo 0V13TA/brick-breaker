@@ -89,3 +89,21 @@ addEventListener("keydown", (e) => {
     GamePlay.init(gameState); // Re-init level
   }
 });
+
+// Double Click -> Toggle Pause
+window.addEventListener("dblclick", () => {
+  if (gameState.gameScreen === GameScreen.GAME_PLAY) {
+    gameState.gameScreen = GameScreen.PAUSE_SCREEN;
+  } else if (gameState.gameScreen === GameScreen.PAUSE_SCREEN) {
+    gameState.gameScreen = GameScreen.GAME_PLAY;
+  }
+});
+
+// Single Click -> Restart Game (ONLY if in Game Over)
+window.addEventListener("click", () => {
+  if (gameState.gameScreen === GameScreen.GAME_OVER) {
+    gameState.life = 3;
+    gameState.gameScreen = GameScreen.GAME_PLAY;
+    GamePlay.init(gameState);
+  }
+});
