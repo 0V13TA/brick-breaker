@@ -60,7 +60,5 @@ export class Ball {
       const ball = this.gameState.ballArray.findIndex((ball) => ball === this);
       this.gameState.ballArray.splice(ball, 1);
     }
-
-    console.log("Nigga I am runnig but nothing ain't showing bitch");
   }
 }

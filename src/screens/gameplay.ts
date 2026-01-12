@@ -210,11 +210,18 @@ export function update(gameState: GameState) {
       // Remove drop
       gameState.uniqueDropArray.splice(index, 1);
 
-      // Activate Status
-      gameState.activeStatuses.push({
-        type: drop.dropType,
-        duration: 600, // 10 seconds at 60fps
-      });
+      const existingStatus = gameState.activeStatuses.find(
+        (s) => s.type === drop.dropType,
+      );
+
+      if (existingStatus) existingStatus.duration = 600;
+      else {
+        // Activate Status
+        gameState.activeStatuses.push({
+          type: drop.dropType,
+          duration: 600, // 10 seconds at 60fps
+        });
+      }
     }
   });
 }
