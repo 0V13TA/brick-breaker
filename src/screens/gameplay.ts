@@ -19,6 +19,25 @@ import {
 let paddle: Paddle;
 let ghost: Paddle | null = null;
 const keysPressed = new Set<string>();
+// Flag to ensure we don't add listeners multiple times on restart
+let inputListenersAdded = false;
+
+function handleInput(clientX: number) {
+  // 1. Clear existing directions so we don't get stuck
+  clearInput();
+
+  // 2. Check which side of the screen was touched
+  if (clientX < window.innerWidth / 2) {
+    keysPressed.add("ArrowLeft");
+  } else {
+    keysPressed.add("ArrowRight");
+  }
+}
+
+function clearInput() {
+  keysPressed.delete("ArrowLeft");
+  keysPressed.delete("ArrowRight");
+}
 
 export function init(gameState: GameState) {
   paddle = new Paddle(gameState);
@@ -37,13 +56,33 @@ export function init(gameState: GameState) {
   gameState.blockArray = [];
   createLevel(gameState);
 
-  window.addEventListener("keydown", (e) => {
-    keysPressed.add(e.key);
-  });
+  // --- INPUT HANDLING ---
+  if (!inputListenersAdded) {
+    inputListenersAdded = true;
 
-  window.addEventListener("keyup", (e) => {
-    keysPressed.delete(e.key);
-  });
+    // 1. Keyboard (Existing)
+    window.addEventListener("keydown", (e) => keysPressed.add(e.key));
+    window.addEventListener("keyup", (e) => keysPressed.delete(e.key));
+
+    // 2. Touch (Mobile)
+    window.addEventListener("touchstart", (e) => {
+      handleInput(e.touches[0].clientX);
+    });
+    window.addEventListener(
+      "touchmove",
+      (e) => {
+        // Prevent scrolling while playing
+        e.preventDefault();
+        handleInput(e.touches[0].clientX);
+      },
+      { passive: false },
+    );
+    window.addEventListener("touchend", clearInput);
+
+    // 3. Mouse (Click)
+    window.addEventListener("mousedown", (e) => handleInput(e.clientX));
+    window.addEventListener("mouseup", clearInput);
+  }
 }
 
 function createLevel(gameState: GameState) {
@@ -153,7 +192,9 @@ export function update(gameState: GameState) {
 
     ball.update();
 
-    gameState.blockArray.forEach((block, index) => {
+    // Iterate BACKWARDS so we can safely remove items
+    for (let index = gameState.blockArray.length - 1; index >= 0; index--) {
+      const block = gameState.blockArray[index];
       const collisionDir = getCollisionDirection(ball, block);
       if (collisionDir) {
         const isFireBall = gameState.activeStatuses.some(
@@ -206,7 +247,7 @@ export function update(gameState: GameState) {
           gameState.gameScreen = GameScreen.GAME_OVER;
         }
       }
-    });
+    }
 
     if (gameState.ballArray.length === 0) {
       gameState.life--; // Lose a life

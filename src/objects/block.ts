@@ -31,6 +31,7 @@ export class Block {
     this.gameState = gameState;
     this.ctx = this.gameState.ctx;
     this.color = "brown";
+    this.content = null;
 
     // SETUP HEALTH
     switch (type) {

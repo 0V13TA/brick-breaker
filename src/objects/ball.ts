@@ -6,7 +6,7 @@ export class Ball {
   y: number;
   dx: number;
   dy: number;
-  baseSpeed: number; // Store the original speed
+  speed: number; // Store the original speed
   radius: number;
   color: string;
   private gameState: GameState;
@@ -21,9 +21,9 @@ export class Ball {
     this.color = "red";
 
     // Initial speed
-    this.baseSpeed = this.gameState.ballSpeed || 0.015;
-    this.dx = this.baseSpeed;
-    this.dy = -this.baseSpeed;
+    this.speed = this.gameState.ballSpeed || 0.015;
+    this.dx = this.speed;
+    this.dy = -this.speed;
   }
 
   draw() {
